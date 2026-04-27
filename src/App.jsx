@@ -1064,7 +1064,7 @@ function Footer({ theme }) {
   return (
     <footer style={{ background: t.footerBg, borderTop: `1px solid ${t.cardBorder}` }}>
       <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div>
             <h3 className="text-2xl font-bold mb-3" style={{ color: t.accent }}>✦ Jewels</h3>
             <p className="text-sm" style={{ color: t.subtleText }}>Premium jewelry crafted with passion and precision.</p>
@@ -1083,8 +1083,8 @@ function Footer({ theme }) {
               </ul>
             </div>
           ))}
-        </div>
-        <div className="pt-6 flex flex-col md:flex-row justify-between items-center text-sm" style={{ borderTop: `1px solid ${t.cardBorder}`, color: t.subtleText }}>
+        </div> */}
+        <div className="pt-6 flex flex-col md:flex-row justify-between items-center text-sm" style={{ borderTop: ` ${t.cardBorder}`, color: t.subtleText }}>
           <p>© 2025 Jewels. All rights reserved.</p>
           <div className="flex gap-6 mt-3 md:mt-0">
             {['Privacy Policy', 'Terms', 'Sitemap'].map(l => (
