@@ -107,7 +107,7 @@ function Header({ cartCount, onCartClick, selectedCategory, onCategoryChange, th
                 height: 44,
                 width: 'auto',
                 objectFit: 'contain',
-                filter: t.isDark ? 'brightness(5.15) saturate(8.1)' : 'none',
+                filter: t.isDark ? '' : 'none',
                 borderRadius: 8,
               }}
             />
