@@ -1,127 +1,36 @@
-'use client';
-
 import { useState, useEffect } from 'react';
 import { ShoppingCart, Menu, X, Search, Heart, Star, Plus, Minus, Trash2, ArrowRight, ArrowLeft, CreditCard, Smartphone, Banknote, Lock, Shield, Truck, RotateCcw, ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import logo from './../public/ADIJEWELSLOGO.png';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// THEME DEFINITIONS
-// ─────────────────────────────────────────────────────────────────────────────
+const ADI_LOGO_SRC = logo;
+
 const THEMES = {
   amber: {
-    name: 'Amber Gold',
-    label: '✦ Amber',
-    primary: '#b45309',
-    primaryHover: '#92400e',
-    primaryLight: '#fef3c7',
-    primaryBorder: '#d97706',
-    accent: '#f59e0b',
-    accentSoft: '#fde68a',
-    navBg: '#ffffff',
-    navText: '#1f2937',
-    badge: '#b45309',
-    btnText: '#ffffff',
-    heroFrom: '#fffbeb',
-    heroTo: '#fef3c7',
-    highlight: '#d97706',
-    // Page/body background
-    pageBg: '#fffbeb',
-    pageText: '#1c1917',
-    // Section backgrounds
-    sectionBg: '#fff8ed',
-    sectionAlt: '#fef3c7',
-    cardBg: '#ffffff',
-    cardBorder: '#fde68a',
-    cardHoverBorder: '#b45309',
-    // Category label color
-    categoryText: '#b45309',
-    // Price color
-    priceColor: '#92400e',
-    // Subtle text
-    subtleText: '#92400e',
-    // Tag pill
-    tagBg: '#fef3c7',
-    tagText: '#b45309',
-    // Detail panel
-    detailPanelBg: '#fffbeb',
-    detailSpecBg: '#fef3c7',
-    detailSpecBorder: '#fde68a',
-    // Footer
-    footerBg: '#1c0a00',
-    isDark: false,
+    name: 'Amber Gold', label: '✦ Amber', primary: '#b45309', primaryHover: '#92400e', primaryLight: '#fef3c7', primaryBorder: '#d97706',
+    accent: '#f59e0b', accentSoft: '#fde68a', navBg: '#ffffff', navText: '#1f2937', badge: '#b45309', btnText: '#ffffff',
+    heroFrom: '#fffbeb', heroTo: '#fef3c7', highlight: '#d97706', pageBg: '#fffbeb', pageText: '#1c1917',
+    sectionBg: '#fff8ed', sectionAlt: '#fef3c7', cardBg: '#ffffff', cardBorder: '#fde68a', cardHoverBorder: '#b45309',
+    categoryText: '#b45309', priceColor: '#92400e', subtleText: '#92400e', tagBg: '#fef3c7', tagText: '#b45309',
+    detailPanelBg: '#fffbeb', detailSpecBg: '#fef3c7', detailSpecBorder: '#fde68a', footerBg: '#1c0a00', isDark: false,
   },
   silver: {
-    name: 'Black & Silver',
-    label: '◆ Silver',
-    primary: '#e2e8f0',
-    primaryHover: '#cbd5e1',
-    primaryLight: '#1e293b',
-    primaryBorder: '#475569',
-    accent: '#94a3b8',
-    accentSoft: '#334155',
-    navBg: '#0f172a',
-    navText: '#f1f5f9',
-    badge: '#e2e8f0',
-    btnText: '#0f172a',
-    heroFrom: '#0f172a',
-    heroTo: '#1e293b',
-    highlight: '#94a3b8',
-    pageBg: '#0f172a',
-    pageText: '#f1f5f9',
-    sectionBg: '#111827',
-    sectionAlt: '#1e293b',
-    cardBg: '#1e293b',
-    cardBorder: '#334155',
-    cardHoverBorder: '#94a3b8',
-    categoryText: '#94a3b8',
-    priceColor: '#e2e8f0',
-    subtleText: '#94a3b8',
-    tagBg: '#334155',
-    tagText: '#94a3b8',
-    detailPanelBg: '#111827',
-    detailSpecBg: '#1e293b',
-    detailSpecBorder: '#334155',
-    footerBg: '#020617',
-    isDark: true,
+    name: 'Black & Silver', label: '◆ Silver', primary: '#e2e8f0', primaryHover: '#cbd5e1', primaryLight: '#1e293b', primaryBorder: '#475569',
+    accent: '#94a3b8', accentSoft: '#334155', navBg: '#0f172a', navText: '#f1f5f9', badge: '#e2e8f0', btnText: '#0f172a',
+    heroFrom: '#0f172a', heroTo: '#1e293b', highlight: '#94a3b8', pageBg: '#0f172a', pageText: '#f1f5f9',
+    sectionBg: '#111827', sectionAlt: '#1e293b', cardBg: '#1e293b', cardBorder: '#334155', cardHoverBorder: '#94a3b8',
+    categoryText: '#94a3b8', priceColor: '#e2e8f0', subtleText: '#94a3b8', tagBg: '#334155', tagText: '#94a3b8',
+    detailPanelBg: '#111827', detailSpecBg: '#1e293b', detailSpecBorder: '#334155', footerBg: '#020617', isDark: true,
   },
   royal: {
-    name: 'Royal Brown & Gold',
-    label: '♛ Royal',
-    primary: '#ca8a04',
-    primaryHover: '#a16207',
-    primaryLight: '#1c0a00',
-    primaryBorder: '#a16207',
-    accent: '#fbbf24',
-    accentSoft: '#78350f',
-    navBg: '#0d0500',
-    navText: '#fef3c7',
-    badge: '#78350f',
-    btnText: '#0d0500',
-    heroFrom: '#0d0500',
-    heroTo: '#1c0a00',
-    highlight: '#ca8a04',
-    pageBg: '#0d0500',
-    pageText: '#fef3c7',
-    sectionBg: '#110600',
-    sectionAlt: '#1c0a00',
-    cardBg: '#1c0a00',
-    cardBorder: '#3b1407',
-    cardHoverBorder: '#ca8a04',
-    categoryText: '#fbbf24',
-    priceColor: '#fef3c7',
-    subtleText: '#ca8a04',
-    tagBg: '#3b1407',
-    tagText: '#fbbf24',
-    detailPanelBg: '#0d0500',
-    detailSpecBg: '#1c0a00',
-    detailSpecBorder: '#3b1407',
-    footerBg: '#030100',
-    isDark: true,
+    name: 'Royal Brown & Gold', label: '♛ Royal', primary: '#ca8a04', primaryHover: '#a16207', primaryLight: '#1c0a00', primaryBorder: '#a16207',
+    accent: '#fbbf24', accentSoft: '#78350f', navBg: '#0d0500', navText: '#fef3c7', badge: '#78350f', btnText: '#0d0500',
+    heroFrom: '#0d0500', heroTo: '#1c0a00', highlight: '#ca8a04', pageBg: '#0d0500', pageText: '#fef3c7',
+    sectionBg: '#110600', sectionAlt: '#1c0a00', cardBg: '#1c0a00', cardBorder: '#3b1407', cardHoverBorder: '#ca8a04',
+    categoryText: '#fbbf24', priceColor: '#fef3c7', subtleText: '#ca8a04', tagBg: '#3b1407', tagText: '#fbbf24',
+    detailPanelBg: '#0d0500', detailSpecBg: '#1c0a00', detailSpecBorder: '#3b1407', footerBg: '#030100', isDark: true,
   },
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// DATA
-// ─────────────────────────────────────────────────────────────────────────────
 const PRODUCTS = [
   { id: 1, name: 'Gold Solitaire Diamond Ring', category: 'Rings', price: 24999, originalPrice: 29999, rating: 5, reviews: 234, discount: 17, isNew: true },
   { id: 2, name: 'Emerald Statement Necklace', category: 'Necklaces', price: 18999, originalPrice: 22999, rating: 4, reviews: 156, discount: 17, isNew: false },
@@ -166,14 +75,17 @@ const fp = (p) => '₹' + p.toLocaleString('en-IN');
 const StarRow = ({ rating, size = 14, t }) => (
   <div className="flex gap-0.5">
     {[...Array(5)].map((_, i) => (
-      <Star key={i} size={size} className={i < rating ? 'fill-yellow-400 text-yellow-400' : ''} style={i >= rating ? { color: t?.isDark ? '#4b5563' : '#d1d5db' } : {}} />
+      <Star
+        key={i}
+        size={size}
+        className={i < rating ? 'fill-yellow-400 text-yellow-400' : ''}
+        style={i >= rating ? { color: t?.isDark ? '#4b5563' : '#d1d5db' } : {}}
+      />
     ))}
   </div>
 );
 
-// ─────────────────────────────────────────────────────────────────────────────
-// HEADER
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── HEADER ───────────────────────────────────────────────────────────────────
 function Header({ cartCount, onCartClick, selectedCategory, onCategoryChange, theme, onThemeChange }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const t = THEMES[theme];
@@ -186,7 +98,29 @@ function Header({ cartCount, onCartClick, selectedCategory, onCategoryChange, th
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
 
-          <h1 className="text-2xl font-bold tracking-tight" style={{ color: t.accent }}>✦ Jewels</h1>
+          {/* Adi Jewels Logo */}
+          <div className="flex items-center gap-2">
+            <img
+              src={ADI_LOGO_SRC}
+              alt="Adi Jewels"
+              style={{
+                height: 44,
+                width: 'auto',
+                objectFit: 'contain',
+                filter: t.isDark ? 'brightness(5.15) saturate(8.1)' : 'none',
+                borderRadius: 8,
+              }}
+            />
+
+            <div className="leading-tight">
+              <div className="font-semibold text-[18px] text-amber-600">
+                Adi Jewels
+              </div>
+              <div className="text-[11px] tracking-wider text-gray-500">
+                HAPPINESS OF LIFE
+              </div>
+            </div>
+          </div>
 
           <div className="hidden md:flex flex-1 max-w-md mx-6">
             <div className="w-full flex items-center rounded-lg px-4 py-2 gap-2" style={{ background: t.isDark ? t.accentSoft : '#f3f4f6', border: `1px solid ${t.cardBorder}` }}>
@@ -194,22 +128,6 @@ function Header({ cartCount, onCartClick, selectedCategory, onCategoryChange, th
               <input type="text" placeholder="Search jewelry..." className="bg-transparent w-full outline-none text-sm" style={{ color: t.navText }} />
             </div>
           </div>
-
-          {/* <div className="hidden md:flex items-center gap-1 rounded-xl p-1" style={{ background: t.isDark ? t.accentSoft : '#f3f4f6', border: `1px solid ${t.cardBorder}` }}>
-            {Object.entries(THEMES).map(([key, th]) => (
-              <button
-                key={key}
-                onClick={() => onThemeChange(key)}
-                className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200"
-                style={{
-                  background: theme === key ? th.primary : 'transparent',
-                  color: theme === key ? (th.isDark ? th.navBg : '#fff') : t.subtleText,
-                }}
-              >
-                {th.label}
-              </button>
-            ))}
-          </div> */}
 
           <button
             onClick={onCartClick}
@@ -223,157 +141,90 @@ function Header({ cartCount, onCartClick, selectedCategory, onCategoryChange, th
             )}
           </button>
         </div>
-
-        {/* <div className="md:hidden flex items-center gap-1 mt-2 rounded-xl p-1 w-full justify-center" style={{ background: t.isDark ? t.accentSoft : '#f3f4f6', border: `1px solid ${t.cardBorder}` }}>
-          {Object.entries(THEMES).map(([key, th]) => (
-            <button
-              key={key}
-              onClick={() => onThemeChange(key)}
-              className="flex-1 py-1.5 rounded-lg text-xs font-bold transition-all duration-200"
-              style={{
-                background: theme === key ? th.primary : 'transparent',
-                color: theme === key ? (th.isDark ? th.navBg : '#fff') : t.subtleText,
-              }}
-            >
-              {th.label}
-            </button>
-          ))}
-        </div> */}
       </div>
 
-  <nav style={{ borderTop: `1px solid ${t.isDark ? t.cardBorder : "#e5e7eb"}` }}>
-
-  {/* Desktop View */}
-  <div className="max-w-7xl mx-auto hidden md:flex items-center justify-between px-4">
-
-    {/* Categories */}
-    <div className="flex flex-wrap items-center">
-      {CATEGORIES.map((cat) => (
-        <button
-          key={cat}
-          onClick={() => onCategoryChange(cat)}
-          className="px-5 py-3 text-sm font-medium whitespace-nowrap transition-all border-b-2"
-          style={{
-            borderColor:
-              selectedCategory === cat ? t.accent : "transparent",
-            color:
-              selectedCategory === cat ? t.accent : t.subtleText,
-            background:
-              selectedCategory === cat
-                ? (t.isDark ? t.accentSoft : t.primaryLight)
-                : "transparent",
-          }}
-        >
-          {cat}
-        </button>
-      ))}
-    </div>
-
-    {/* Desktop Theme Tabs */}
-    <div className="flex items-center gap-3 ml-4 shrink-0">
-      {Object.entries(THEMES).map(([key, th]) => (
-        <button
-          key={key}
-          onClick={() => onThemeChange(key)}
-          className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold border"
-          style={{
-            background: theme === key ? th.primary : "transparent",
-            color:
-              theme === key
-                ? (th.isDark ? th.navBg : "#fff")
-                : t.subtleText,
-            borderColor:
-              theme === key ? th.primary : t.cardBorder,
-          }}
-        >
-          <span
-            className="w-3 h-3 rounded-full"
-            style={{ background: th.primary }}
-          />
-          {th.name}
-        </button>
-      ))}
-    </div>
-  </div>
-
-  {/* Mobile Hamburger Menu */}
-  {mobileMenuOpen && (
-    <div
-      className="md:hidden"
-      style={{ background: t.navBg }}
-    >
-      {/* Categories */}
-      <div className="flex flex-col">
-        {CATEGORIES.map((cat) => (
-          <button
-            key={cat}
-            onClick={() => {
-              onCategoryChange(cat);
-              setMobileMenuOpen(false);
-            }}
-            className="px-4 py-3 text-left text-sm font-medium"
-            style={{
-              color:
-                selectedCategory === cat ? t.accent : t.subtleText,
-              borderLeft:
-                selectedCategory === cat
-                  ? `3px solid ${t.accent}`
-                  : "3px solid transparent",
-              background:
-                selectedCategory === cat
-                  ? (t.isDark ? t.accentSoft : t.primaryLight)
-                  : "transparent",
-            }}
-          >
-            {cat}
-          </button>
-        ))}
-      </div>
-
-      {/* Mobile Theme Tabs */}
-      <div
-        className="p-4 border-t"
-        style={{ borderColor: t.cardBorder }}
-      >
-        <p
-          className="text-xs font-bold uppercase mb-3"
-          style={{ color: t.subtleText }}
-        >
-          Theme Colors
-        </p>
-
-        <div className="grid grid-cols-3 gap-2">
-          {Object.entries(THEMES).map(([key, th]) => (
-            <button
-              key={key}
-              onClick={() => onThemeChange(key)}
-              className="rounded-xl px-3 py-3 text-xs font-semibold border"
-              style={{
-                background:
-                  theme === key ? th.primary : "transparent",
-                color:
-                  theme === key
-                    ? (th.isDark ? th.navBg : "#fff")
-                    : t.subtleText,
-                borderColor:
-                  theme === key ? th.primary : t.cardBorder,
-              }}
-            >
-              {th.name}
-            </button>
-          ))}
+      <nav style={{ borderTop: `1px solid ${t.isDark ? t.cardBorder : '#e5e7eb'}` }}>
+        <div className="max-w-7xl mx-auto hidden md:flex items-center justify-between px-4">
+          <div className="flex flex-wrap items-center">
+            {CATEGORIES.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => onCategoryChange(cat)}
+                className="px-5 py-3 text-sm font-medium whitespace-nowrap transition-all border-b-2"
+                style={{
+                  borderColor: selectedCategory === cat ? t.accent : 'transparent',
+                  color: selectedCategory === cat ? t.accent : t.subtleText,
+                  background: selectedCategory === cat ? (t.isDark ? t.accentSoft : t.primaryLight) : 'transparent',
+                }}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center gap-3 ml-4 shrink-0">
+            {Object.entries(THEMES).map(([key, th]) => (
+              <button
+                key={key}
+                onClick={() => onThemeChange(key)}
+                className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold border"
+                style={{
+                  background: theme === key ? th.primary : 'transparent',
+                  color: theme === key ? (th.isDark ? th.navBg : '#fff') : t.subtleText,
+                  borderColor: theme === key ? th.primary : t.cardBorder,
+                }}
+              >
+                <span className="w-3 h-3 rounded-full" style={{ background: th.primary }} />
+                {th.name}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
-    </div>
-  )}
-</nav>
+
+        {mobileMenuOpen && (
+          <div className="md:hidden" style={{ background: t.navBg }}>
+            <div className="flex flex-col">
+              {CATEGORIES.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => { onCategoryChange(cat); setMobileMenuOpen(false); }}
+                  className="px-4 py-3 text-left text-sm font-medium"
+                  style={{
+                    color: selectedCategory === cat ? t.accent : t.subtleText,
+                    borderLeft: selectedCategory === cat ? `3px solid ${t.accent}` : '3px solid transparent',
+                    background: selectedCategory === cat ? (t.isDark ? t.accentSoft : t.primaryLight) : 'transparent',
+                  }}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+            <div className="p-4 border-t" style={{ borderColor: t.cardBorder }}>
+              <p className="text-xs font-bold uppercase mb-3" style={{ color: t.subtleText }}>Theme Colors</p>
+              <div className="grid grid-cols-3 gap-2">
+                {Object.entries(THEMES).map(([key, th]) => (
+                  <button
+                    key={key}
+                    onClick={() => onThemeChange(key)}
+                    className="rounded-xl px-3 py-3 text-xs font-semibold border"
+                    style={{
+                      background: theme === key ? th.primary : 'transparent',
+                      color: theme === key ? (th.isDark ? th.navBg : '#fff') : t.subtleText,
+                      borderColor: theme === key ? th.primary : t.cardBorder,
+                    }}
+                  >
+                    {th.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </nav>
     </header>
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// HERO
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── HERO ─────────────────────────────────────────────────────────────────────
 function Hero({ theme }) {
   const t = THEMES[theme];
   return (
@@ -418,9 +269,7 @@ function Hero({ theme }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// PRODUCT GRID
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── PRODUCT GRID ─────────────────────────────────────────────────────────────
 function ProductGrid({ products, onAddToCart, selectedCategory, theme, onProductSelect }) {
   const t = THEMES[theme];
   const filtered = selectedCategory === 'All' ? products : products.filter(p => p.category === selectedCategory);
@@ -428,7 +277,6 @@ function ProductGrid({ products, onAddToCart, selectedCategory, theme, onProduct
   return (
     <section className="py-12 md:py-16" style={{ background: t.sectionBg }}>
       <div className="max-w-7xl mx-auto px-4">
-        {/* Section Header */}
         <div className="mb-10 pb-6" style={{ borderBottom: `1px solid ${t.cardBorder}` }}>
           <div className="flex items-end justify-between">
             <div>
@@ -455,17 +303,10 @@ function ProductGrid({ products, onAddToCart, selectedCategory, theme, onProduct
               onMouseEnter={e => { e.currentTarget.style.borderColor = t.cardHoverBorder; e.currentTarget.style.boxShadow = t.isDark ? `0 8px 32px rgba(0,0,0,0.6), 0 0 0 1px ${t.cardHoverBorder}` : `0 8px 32px rgba(0,0,0,0.12), 0 0 0 1px ${t.cardHoverBorder}`; }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = t.cardBorder; e.currentTarget.style.boxShadow = t.isDark ? '0 4px 24px rgba(0,0,0,0.4)' : '0 2px 12px rgba(0,0,0,0.06)'; }}
             >
-              {/* Image */}
               <div className="relative h-52 md:h-60 overflow-hidden" style={{ background: t.isDark ? t.accentSoft : '#f3f4f6' }}>
-                <img
-                  src={getProductImage(product.name)}
-                  alt={product.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                {/* Overlay gradient */}
+                <img src={getProductImage(product.name)} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                   style={{ background: `linear-gradient(to top, ${t.isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.2)'}, transparent)` }} />
-
                 {product.discount && (
                   <div className="absolute top-3 right-3 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-md">
                     -{product.discount}%
@@ -485,8 +326,6 @@ function ProductGrid({ products, onAddToCart, selectedCategory, theme, onProduct
                   <Heart size={16} className="text-red-500" />
                 </button>
               </div>
-
-              {/* Info */}
               <div className="p-4">
                 <p className="text-xs font-bold uppercase tracking-wider mb-1" style={{ color: t.accent }}>{product.category}</p>
                 <h3 className="font-bold line-clamp-2 text-sm md:text-base mb-2" style={{ color: t.pageText }}>{product.name}</h3>
@@ -500,10 +339,7 @@ function ProductGrid({ products, onAddToCart, selectedCategory, theme, onProduct
                     <span className="text-sm line-through" style={{ color: t.isDark ? '#6b7280' : '#9ca3af' }}>{fp(product.originalPrice)}</span>
                   )}
                 </div>
-
-                {/* Divider */}
                 <div className="mb-3" style={{ height: 1, background: t.cardBorder }} />
-
                 <button
                   onClick={e => { e.stopPropagation(); onAddToCart(product); }}
                   className="w-full py-2.5 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-all hover:opacity-90 active:scale-95"
@@ -520,9 +356,7 @@ function ProductGrid({ products, onAddToCart, selectedCategory, theme, onProduct
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// PRODUCT DETAIL PANEL
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── PRODUCT DETAIL ───────────────────────────────────────────────────────────
 function ProductDetail({ product, isOpen, onClose, onAddToCart, theme }) {
   const [activeImg, setActiveImg] = useState(0);
   const [wishlisted, setWishlisted] = useState(false);
@@ -549,7 +383,6 @@ function ProductDetail({ product, isOpen, onClose, onAddToCart, theme }) {
         className={`fixed inset-y-0 right-0 w-full md:w-[80vw] lg:w-[70vw] max-w-5xl z-50 shadow-2xl transform transition-transform duration-500 overflow-y-auto ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
         style={{ background: t.detailPanelBg }}
       >
-        {/* Top bar */}
         <div className="sticky top-0 z-10 px-6 py-4 flex items-center justify-between"
           style={{ background: t.detailPanelBg, borderBottom: `1px solid ${t.cardBorder}` }}>
           <button onClick={onClose} className="flex items-center gap-2 font-medium text-sm hover:opacity-70 transition-opacity"
@@ -569,7 +402,6 @@ function ProductDetail({ product, isOpen, onClose, onAddToCart, theme }) {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2">
-          {/* Images */}
           <div className="p-6" style={{ borderRight: `1px solid ${t.cardBorder}` }}>
             <div className="relative rounded-2xl overflow-hidden aspect-square mb-4 group"
               style={{ background: t.isDark ? t.accentSoft : '#f3f4f6', border: `1px solid ${t.cardBorder}` }}>
@@ -601,7 +433,6 @@ function ProductDetail({ product, isOpen, onClose, onAddToCart, theme }) {
             </div>
           </div>
 
-          {/* Details */}
           <div className="p-6 flex flex-col gap-5">
             <div>
               <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: t.accent }}>{product.category}</p>
@@ -614,7 +445,6 @@ function ProductDetail({ product, isOpen, onClose, onAddToCart, theme }) {
               </div>
             </div>
 
-            {/* Price block */}
             <div className="rounded-xl p-4" style={{ background: t.detailSpecBg, border: `1px solid ${t.detailSpecBorder}` }}>
               <div className="flex items-baseline gap-3 mb-1">
                 <span className="text-3xl font-bold" style={{ color: t.priceColor }}>{fp(product.price)}</span>
@@ -670,7 +500,6 @@ function ProductDetail({ product, isOpen, onClose, onAddToCart, theme }) {
           </div>
         </div>
 
-        {/* Reviews */}
         <div className="px-6 lg:px-12 py-10" style={{ borderTop: `1px solid ${t.cardBorder}`, background: t.sectionAlt }}>
           <h2 className="text-xl font-bold mb-6" style={{ color: t.pageText }}>Customer Reviews</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -693,9 +522,7 @@ function ProductDetail({ product, isOpen, onClose, onAddToCart, theme }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// CART SIDEBAR
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── CART ─────────────────────────────────────────────────────────────────────
 function Cart({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem, onProceedCheckout, theme }) {
   const t = THEMES[theme];
   const total = cartItems.reduce((s, i) => s + i.price * i.quantity, 0);
@@ -782,9 +609,7 @@ function Cart({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem, onPr
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// ADDRESS FORM
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── ADDRESS FORM ─────────────────────────────────────────────────────────────
 function AddressForm({ onSubmit, onBack, theme }) {
   const t = THEMES[theme];
   const [formData, setFormData] = useState({ fullName: '', phone: '', email: '', addressLine1: '', addressLine2: '', city: '', state: '', pincode: '' });
@@ -793,7 +618,7 @@ function AddressForm({ onSubmit, onBack, theme }) {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(f => ({ ...f, [name]: value }));
-    if (errors[name]) setErrors(e => ({ ...e, [name]: '' }));
+    if (errors[name]) setErrors(er => ({ ...er, [name]: '' }));
   };
 
   const handleSubmit = (e) => {
@@ -871,9 +696,7 @@ function AddressForm({ onSubmit, onBack, theme }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// PAYMENT FORM
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── PAYMENT FORM ─────────────────────────────────────────────────────────────
 function PaymentForm({ shippingAddress, cartItems, onSubmit, onBack, total, theme }) {
   const t = THEMES[theme];
   const [paymentMethod, setPaymentMethod] = useState('card');
@@ -926,7 +749,6 @@ function PaymentForm({ shippingAddress, cartItems, onSubmit, onBack, total, them
       <div className="w-full md:max-w-4xl md:rounded-2xl rounded-t-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[90vh]"
         style={{ background: t.detailPanelBg, border: `1px solid ${t.cardBorder}` }}>
 
-        {/* Order Summary sidebar */}
         <div className="hidden md:flex md:w-80 flex-col p-6" style={{ background: t.sectionAlt, borderRight: `1px solid ${t.cardBorder}` }}>
           <h3 className="font-bold mb-4" style={{ color: t.pageText }}>Order Summary</h3>
           <div className="flex-1 overflow-y-auto space-y-3 mb-4">
@@ -960,7 +782,6 @@ function PaymentForm({ shippingAddress, cartItems, onSubmit, onBack, total, them
           )}
         </div>
 
-        {/* Payment form */}
         <div className="flex-1 overflow-y-auto">
           <div className="sticky top-0 p-4 flex items-center gap-3 md:hidden"
             style={{ background: t.detailPanelBg, borderBottom: `1px solid ${t.cardBorder}` }}>
@@ -1056,50 +877,39 @@ function PaymentForm({ shippingAddress, cartItems, onSubmit, onBack, total, them
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// FOOTER
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── FOOTER ───────────────────────────────────────────────────────────────────
 function Footer({ theme }) {
   const t = THEMES[theme];
   return (
     <footer style={{ background: t.footerBg, borderTop: `1px solid ${t.cardBorder}` }}>
       <div className="max-w-7xl mx-auto px-4 py-6">
-        {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-          <div>
-            <h3 className="text-2xl font-bold mb-3" style={{ color: t.accent }}>✦ Jewels</h3>
-            <p className="text-sm" style={{ color: t.subtleText }}>Premium jewelry crafted with passion and precision.</p>
-          </div>
-          {[
-            ['Quick Links', ['About Us', 'Collections', 'New Arrivals', 'Contact']],
-            ['Support', ['FAQs', 'Return Policy', 'Shipping Info', 'Track Order']],
-            ['Contact', ['hello@jewels.com', '+91 9999 999 999', 'Mon–Sat, 10AM–8PM']],
-          ].map(([title, items]) => (
-            <div key={title}>
-              <h4 className="font-semibold mb-4" style={{ color: t.pageText }}>{title}</h4>
-              <ul className="space-y-2 text-sm" style={{ color: t.subtleText }}>
-                {items.map(item => (
-                  <li key={item}><a href="#" className="hover:opacity-100 opacity-70 transition-opacity">{item}</a></li>
-                ))}
-              </ul>
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="flex items-center gap-3">
+            <img
+              src={ADI_LOGO_SRC}
+              alt="Adi Jewels"
+              style={{
+                height: 44,
+                width: 'auto',
+                objectFit: 'contain',
+                opacity: 0.85,
+                filter: 'brightness(1.3) saturate(0.8)',
+                borderRadius: 6,
+              }}
+            />
+            <div className="flex flex-col leading-tight">
+              <span className="text-sm font-bold tracking-wide" style={{ color: '#e5e7eb' }}>Adi Jewels</span>
+              <span className="text-xs tracking-widest uppercase" style={{ color: '#9ca3af' }}>Hapiness of Life · India</span>
             </div>
-          ))}
-        </div> */}
-        <div className="pt-6 flex flex-col md:flex-row justify-between items-center text-sm" style={{ borderTop: ` ${t.cardBorder}`, color: t.subtleText }}>
-          <p>© 2025 Jewels. All rights reserved.</p>
-          {/* <div className="flex gap-6 mt-3 md:mt-0">
-            {['Privacy Policy', 'Terms', 'Sitemap'].map(l => (
-              <a key={l} href="#" className="hover:opacity-100 opacity-60 transition-opacity">{l}</a>
-            ))}
-          </div> */}
+          </div>
+          <p className="text-xs" style={{ color: '#6b7280' }}>© 2025 Adi Jewels. All rights reserved.</p>
         </div>
       </div>
     </footer>
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// ROOT APP
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── ROOT APP ─────────────────────────────────────────────────────────────────
 export default function JewelryApp() {
   const [theme, setTheme] = useState('amber');
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -1130,7 +940,6 @@ export default function JewelryApp() {
   const total = cartItems.reduce((s, i) => s + i.price * i.quantity, 0);
 
   return (
-    // ← The key change: the outermost wrapper now takes the page background & text from the theme
     <main className="min-h-screen transition-colors duration-300" style={{ background: t.pageBg, color: t.pageText }}>
       <Header
         cartCount={cartItems.length}
@@ -1140,9 +949,7 @@ export default function JewelryApp() {
         theme={theme}
         onThemeChange={setTheme}
       />
-
       <Hero theme={theme} />
-
       <ProductGrid
         products={PRODUCTS}
         onAddToCart={handleAddToCart}
@@ -1150,7 +957,6 @@ export default function JewelryApp() {
         theme={theme}
         onProductSelect={(p) => { setSelectedProduct(p); setDetailOpen(true); }}
       />
-
       <ProductDetail
         product={selectedProduct}
         isOpen={detailOpen}
@@ -1158,7 +964,6 @@ export default function JewelryApp() {
         onAddToCart={handleAddToCart}
         theme={theme}
       />
-
       {cartOpen && checkoutStep === 'cart' && (
         <Cart
           isOpen={cartOpen}
@@ -1170,7 +975,6 @@ export default function JewelryApp() {
           theme={theme}
         />
       )}
-
       {cartOpen && checkoutStep === 'address' && (
         <AddressForm
           onSubmit={(addr) => { setShippingAddress(addr); setCheckoutStep('payment'); }}
@@ -1178,7 +982,6 @@ export default function JewelryApp() {
           theme={theme}
         />
       )}
-
       {cartOpen && checkoutStep === 'payment' && (
         <PaymentForm
           shippingAddress={shippingAddress}
@@ -1189,7 +992,6 @@ export default function JewelryApp() {
           theme={theme}
         />
       )}
-
       {cartOpen && checkoutStep === 'confirmation' && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl"
@@ -1210,9 +1012,7 @@ export default function JewelryApp() {
           </div>
         </div>
       )}
-
       <Footer theme={theme} />
-
       {cartItems.length > 0 && (
         <button
           onClick={() => { setCartOpen(true); setCheckoutStep('cart'); }}
