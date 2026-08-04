@@ -1,374 +1,349 @@
-'use client';
+import { useState, useEffect } from 'react';
+import {
+  ShoppingCart, AlertCircle, RefreshCw, X, ChevronLeft,
+  Shield, Truck, RotateCcw, Check, Heart, BarChart2,
+  Hash, Calendar, Box, TrendingDown, TrendingUp, Tag, Layers, Loader2,
+} from 'lucide-react';
+import { addToCart } from './Cartservice';
+import { THEMES } from './themes';
+import useStore from './Usestore';
 
-import { useState } from 'react';
-import { X, Star, ShoppingCart, Heart, Shield, Truck, RotateCcw, ChevronLeft, ChevronRight, Share2, Check } from 'lucide-react';
+const fp = (p) => '₹' + Number(p || 0).toLocaleString('en-IN');
+const fmt = (d) => d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : null;
 
-// Map product name to multiple gallery images
-const getProductGallery = (name) => {
-  if (name.includes('Ring')) return [
-    'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800&q=80',
-    'https://images.unsplash.com/photo-1586105251261-72a756497a11?w=800&q=80',
-    'https://images.unsplash.com/photo-1543294001-f7cd5d7fb516?w=800&q=80',
-    'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=800&q=80',
-  ];
-  if (name.includes('Necklace')) return [
-    'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800&q=80',
-    'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=800&q=80',
-    'https://images.unsplash.com/photo-1589128777073-263566ae5e4d?w=800&q=80',
-    'https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=800&q=80',
-  ];
-  if (name.includes('Earrings')) return [
-    'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=800&q=80',
-    'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800&q=80',
-    'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800&q=80',
-    'https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=800&q=80',
-  ];
-  if (name.includes('Bracelet') || name.includes('Bangle')) return [
-    'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=800&q=80',
-    'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800&q=80',
-    'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=800&q=80',
-    'https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=800&q=80',
-  ];
-  if (name.includes('Pendant')) return [
-    'https://images.unsplash.com/photo-1589128777073-263566ae5e4d?w=800&q=80',
-    'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800&q=80',
-    'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=800&q=80',
-    'https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=800&q=80',
-  ];
-  return [
-    'https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=800&q=80',
-    'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800&q=80',
-    'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800&q=80',
-    'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=800&q=80',
-  ];
+const getItemImage = (name = '') => {
+  const n = name.toLowerCase();
+  if (n.includes('ring')) return 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800&q=80';
+  if (n.includes('necklace') || n.includes('chain')) return 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800&q=80';
+  if (n.includes('earring') || n.includes('ear')) return 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=800&q=80';
+  if (n.includes('bracelet') || n.includes('bangle') || n.includes('kada')) return 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=800&q=80';
+  if (n.includes('pendant') || n.includes('locket')) return 'https://images.unsplash.com/photo-1589128777073-263566ae5e4d?w=800&q=80';
+  if (n.includes('diamond')) return 'https://images.unsplash.com/photo-1543294001-f7cd5d7fb516?w=800&q=80';
+  return 'https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=800&q=80';
 };
 
-const getProductDescription = (name, category) => {
-  const descriptions = {
-    Ring: `This exquisite ring is meticulously handcrafted by master artisans with over two decades of experience. Featuring a brilliant-cut gemstone set in 22KT gold, every facet is precision-cut to maximize light reflection. The band is ergonomically shaped for all-day comfort and is hallmarked for purity. A perfect heirloom piece that transcends generations.`,
-    Necklace: `A statement of timeless elegance, this necklace is crafted in 22KT gold with hand-set stones that catch light from every angle. The delicate chain flows gracefully and is secured with a lobster clasp for reliability. Each link is polished to a mirror finish. Ideal for festive occasions, weddings, or gifting to someone special.`,
-    Earrings: `Lightweight yet impactful, these earrings are designed for the modern woman who values both beauty and comfort. Set with hand-picked gemstones in a secure bezel setting, they feature a butterfly back closure. The gold is hallmarked BIS 916, ensuring authenticity and lasting brilliance with every wear.`,
-    Bracelet: `An artful fusion of tradition and contemporary design, this bracelet is crafted from 22KT gold with intricate filigree work inspired by ancient Indian motifs. Flexible and adjustable, it fits most wrist sizes comfortably. Each bangle is finished with a high-polish sheen and comes in a premium gift box.`,
-    Pendant: `This pendant is a miniature work of art — every detail carved with exceptional precision. Suspended from a delicate gold chain, it rests perfectly at the collarbone. Set with a certified gemstone, it carries both aesthetic and symbolic value. An ideal gift for birthdays, anniversaries, or milestones.`,
-  };
-  return descriptions[category] || descriptions['Ring'];
+const getStockStatus = (qty) => {
+  if (!qty || qty <= 0) return { label: 'Out of Stock', color: '#ef4444', bg: '#fef2f2' };
+  if (qty < 10) return { label: 'Low Stock', color: '#f59e0b', bg: '#fffbeb' };
+  return { label: 'In Stock', color: '#22c55e', bg: '#f0fdf4' };
 };
 
-const ratingBreakdown = [
-  { stars: 5, pct: 68 },
-  { stars: 4, pct: 20 },
-  { stars: 3, pct: 8 },
-  { stars: 2, pct: 2 },
-  { stars: 1, pct: 2 },
-];
+// ─── Sub-components ───────────────────────────────────────────────────────────
+const InfoRow = ({ label, value, t, icon: Icon }) =>
+  value != null && value !== '' ? (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: `1px solid ${t.cardBorder}` }}>
+      <span style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: t.subtleText }}>
+        {Icon && <Icon size={14} style={{ color: t.accent }} />}{label}
+      </span>
+      <span style={{ fontSize: 13, fontWeight: 600, color: t.pageText }}>{value}</span>
+    </div>
+  ) : null;
 
-const reviews = [
-  { name: 'Priya S.', rating: 5, date: 'Mar 2025', text: 'Absolutely stunning piece! The craftsmanship is impeccable and it arrived beautifully packaged. Highly recommend.' },
-  { name: 'Ananya R.', rating: 5, date: 'Feb 2025', text: 'Gifted this to my mother for her anniversary. She was in tears — it is that beautiful. Worth every rupee.' },
-  { name: 'Meena K.', rating: 4, date: 'Jan 2025', text: 'Lovely design, very elegant. Delivery was prompt and the quality matches the price point perfectly.' },
-];
+const StatMini = ({ label, value, color, icon: Icon, t }) => (
+  <div style={{ background: t.isDark ? t.tagBg : '#fff', border: `1px solid ${t.cardBorder}`, borderRadius: 8, padding: '10px 12px' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
+      <Icon size={12} style={{ color }} /><span style={{ fontSize: 10, color: t.subtleText }}>{label}</span>
+    </div>
+    <p style={{ fontSize: 16, fontWeight: 700, color, margin: 0 }}>{value ?? '—'}</p>
+  </div>
+);
 
-export default function ProductDetail({ product, isOpen, onClose, onAddToCart }) {
-  const [activeImg, setActiveImg] = useState(0);
-  const [wishlisted, setWishlisted] = useState(false);
-  const [addedToCart, setAddedToCart] = useState(false);
+const SpecCard = ({ label, value, t }) => (
+  <div style={{ background: t.detailSpecBg, border: `1px solid ${t.detailSpecBorder}`, borderRadius: 8, padding: '10px 12px' }}>
+    <p style={{ fontSize: 10, color: t.subtleText, margin: '0 0 2px' }}>{label}</p>
+    <p style={{ fontSize: 13, fontWeight: 600, color: t.pageText, margin: 0 }}>{value}</p>
+  </div>
+);
+
+const TrustBadge = ({ icon: Icon, label, sub, t }) => (
+  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 6 }}>
+    <div style={{ padding: 8, background: t.tagBg, borderRadius: 8 }}><Icon size={16} style={{ color: t.accent }} /></div>
+    <p style={{ fontSize: 11, fontWeight: 600, color: t.pageText, margin: 0 }}>{label}</p>
+    <p style={{ fontSize: 10, color: t.subtleText, margin: 0 }}>{sub}</p>
+  </div>
+);
+
+// ─── Sign-in banner shown inside the detail panel ────────────────────────────
+const SignInBanner = ({ t, onSignInClick }) => (
+  <div style={{
+    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+    gap: 12, background: t.isDark ? t.accentSoft : t.primaryLight,
+    border: `1.5px solid ${t.cardBorder}`, borderRadius: 12,
+    padding: '12px 16px', marginBottom: 12,
+  }}>
+    <div>
+      <p style={{ fontSize: 13, fontWeight: 700, color: t.pageText, margin: '0 0 2px' }}>Guest Shopping Active</p>
+      <p style={{ fontSize: 11, color: t.subtleText, margin: 0 }}>You can add to cart now and sign in or checkout as guest!</p>
+    </div>
+    <button
+      onClick={onSignInClick}
+      style={{
+        flexShrink: 0, fontSize: 12, fontWeight: 700,
+        color: t.btnText, background: t.primary,
+        border: 'none', borderRadius: 8,
+        padding: '8px 14px', cursor: 'pointer',
+      }}
+    >
+      Sign In →
+    </button>
+  </div>
+);
+
+// ─── MAIN ─────────────────────────────────────────────────────────────────────
+export default function ProductDetail({ itemId, isOpen, onClose, theme = 'amber', onAddToCart, onSignInRequest }) {
+  const t = THEMES[theme];
+
+  const { customerId, clientId, businessId } = useStore();
+
+  const [detail, setDetail] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [qty, setQty] = useState(1);
+  const [btnState, setBtnState] = useState('idle');
+  const [btnErr, setBtnErr] = useState('');
+  const [wishlisted, setWishlisted] = useState(false);
 
-  if (!product) return null;
+  useEffect(() => {
+    if (!itemId || !isOpen) return;
+    setDetail(null); setError(null); setQty(1); setBtnState('idle'); setBtnErr('');
+    setLoading(true);
+    fetch(`http://127.0.0.1:8000/api/inventory/${clientId}/business/${businessId}/items/${itemId}`)
+      .then((r) => r.json())
+      .then((json) => {
+        if (!json.success) throw new Error(json.message || 'Fetch failed');
+        setDetail(json.data?.item);
+      })
+      .catch((e) => setError(e.message))
+      .finally(() => setLoading(false));
+  }, [itemId, isOpen]);
 
-  const images = getProductGallery(product.name);
-  const description = getProductDescription(product.name, product.category);
-  const discount = product.discount || 0;
-  const savings = product.originalPrice ? product.originalPrice - product.price : 0;
+  const stockBatch = detail?.item_stock?.[0];
+  const mrp = stockBatch?.mrp || detail?.mrp || 0;
+  const sellRate = stockBatch?.sell_rate || detail?.sell_rate || 0;
+  const purchaseRate = stockBatch?.purchase_rate || 0;
+  const availableQty = stockBatch?.available_quantity ?? detail?.current_stock ?? 0;
+  const inQty = stockBatch?.in_quantity || 0;
+  const outQty = stockBatch?.out_quantity || 0;
+  const stockStatus = getStockStatus(availableQty);
+  const cgst = stockBatch?.cgst || detail?.cgst || 0;
+  const sgst = stockBatch?.sgst || detail?.sgst || 0;
 
-  const handleAddToCart = () => {
-    onAddToCart({ ...product, quantity: qty });
-    setAddedToCart(true);
-    setTimeout(() => setAddedToCart(false), 2000);
+  const outOfStock = !detail || availableQty <= 0;
+  const isLoading = btnState === 'loading';
+  const outDisabled = outOfStock || isLoading;
+
+  const handleAddToCart = async () => {
+    if (outDisabled) return;
+
+    const price = stockBatch?.mrp || stockBatch?.sell_rate || detail?.mrp || 0;
+    onAddToCart?.({ ...detail, mrp: price, quantity: qty });
+    setBtnState('loading'); setBtnErr('');
+
+    const result = await addToCart({ item_id: detail.id, qty, itemData: detail });
+
+    if (result.success) {
+      setBtnState('success');
+      setTimeout(() => setBtnState('idle'), 2500);
+    } else {
+      setBtnState('error'); setBtnErr(result.error || 'API error');
+      setTimeout(() => { setBtnState('idle'); setBtnErr(''); }, 3500);
+    }
   };
 
-  const prevImg = () => setActiveImg((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-  const nextImg = () => setActiveImg((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  const btnBg =
+    outOfStock ? (t.isDark ? '#374151' : '#e5e7eb')
+      : btnState === 'success' ? '#16a34a'
+        : btnState === 'error' ? '#dc2626'
+            : t.primary;
+
+  const btnFg =
+    outOfStock ? (t.isDark ? '#6b7280' : '#9ca3af')
+      : (btnState === 'success' || btnState === 'error') ? '#fff'
+          : t.btnText;
+
+  if (!isOpen) return null;
 
   return (
     <>
-      {/* Overlay */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 transition-opacity"
-          onClick={onClose}
-        />
-      )}
+      <style>{`
+        @keyframes pdSlideIn { from { transform:translateX(100%) } to { transform:translateX(0) } }
+        @keyframes spin { to { transform:rotate(360deg) } }
+      `}</style>
 
-      {/* Slide-in Panel */}
-      <div
-        className={`fixed inset-y-0 right-0 w-full md:w-[85vw] lg:w-[75vw] max-w-5xl bg-white z-50 shadow-2xl transform transition-transform duration-500 ease-in-out overflow-y-auto ${
-          isOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
-      >
-        {/* Top Bar */}
-        <div className="sticky top-0 z-10 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between">
-          <button
-            onClick={onClose}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors font-medium"
-          >
-            <ChevronLeft size={20} />
-            <span className="text-sm">Back to Collection</span>
+      {/* Backdrop */}
+      <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(4px)', zIndex: 50 }} />
+
+      {/* Panel */}
+      <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: '100%', maxWidth: 860, background: t.detailPanelBg, zIndex: 51, overflowY: 'auto', boxShadow: '-8px 0 40px rgba(0,0,0,0.3)', animation: 'pdSlideIn 0.35s cubic-bezier(0.32,0.72,0,1)' }}>
+
+        {/* Sticky header */}
+        <div style={{ position: 'sticky', top: 0, zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', background: t.detailPanelBg, borderBottom: `1px solid ${t.cardBorder}` }}>
+          <button onClick={onClose} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', color: t.subtleText, fontSize: 13, fontWeight: 600 }}>
+            <ChevronLeft size={18} /> Back to Products
           </button>
-          <div className="flex items-center gap-3">
-            <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-              <Share2 size={18} className="text-gray-600" />
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button onClick={() => setWishlisted((w) => !w)} style={{ padding: 8, borderRadius: '50%', background: wishlisted ? '#fef2f2' : t.tagBg, border: 'none', cursor: 'pointer', display: 'flex' }}>
+              <Heart size={18} style={{ color: wishlisted ? '#ef4444' : t.subtleText, fill: wishlisted ? '#ef4444' : 'none' }} />
             </button>
-            <button
-              onClick={() => setWishlisted(!wishlisted)}
-              className="p-2 hover:bg-red-50 rounded-full transition-colors"
-            >
-              <Heart
-                size={18}
-                className={wishlisted ? 'fill-red-500 text-red-500' : 'text-gray-600'}
-              />
-            </button>
-            <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-              <X size={20} className="text-gray-600" />
+            <button onClick={onClose} style={{ padding: 8, borderRadius: '50%', background: t.tagBg, border: 'none', cursor: 'pointer', display: 'flex' }}>
+              <X size={18} style={{ color: t.subtleText }} />
             </button>
           </div>
         </div>
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
-
-          {/* ── LEFT: Images ── */}
-          <div className="p-6 lg:p-8 lg:border-r border-gray-100">
-            {/* Main Image */}
-            <div className="relative rounded-2xl overflow-hidden bg-gray-50 aspect-square mb-4 group">
-              <img
-                key={activeImg}
-                src={images[activeImg]}
-                alt={product.name}
-                className="w-full h-full object-cover transition-all duration-500"
-              />
-
-              {/* Discount badge */}
-              {discount > 0 && (
-                <div className="absolute top-4 left-4 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-                  -{discount}% OFF
-                </div>
-              )}
-              {product.isNew && (
-                <div className="absolute top-4 right-4 bg-amber-700 text-white text-xs font-bold px-3 py-1 rounded-full">
-                  NEW
-                </div>
-              )}
-
-              {/* Arrows */}
-              <button
-                onClick={prevImg}
-                className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <ChevronLeft size={18} />
-              </button>
-              <button
-                onClick={nextImg}
-                className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <ChevronRight size={18} />
-              </button>
-            </div>
-
-            {/* Thumbnails */}
-            <div className="grid grid-cols-4 gap-3">
-              {images.map((img, i) => (
-                <button
-                  key={i}
-                  onClick={() => setActiveImg(i)}
-                  className={`aspect-square rounded-xl overflow-hidden border-2 transition-all duration-200 ${
-                    activeImg === i ? 'border-amber-600 scale-105 shadow-md' : 'border-gray-200 hover:border-amber-300'
-                  }`}
-                >
-                  <img src={img} alt={`view ${i + 1}`} className="w-full h-full object-cover" />
-                </button>
-              ))}
-            </div>
+        {/* Loading */}
+        {loading && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 80, gap: 16 }}>
+            <RefreshCw size={32} style={{ color: t.accent, animation: 'spin 1s linear infinite' }} />
+            <p style={{ color: t.subtleText, fontSize: 14, margin: 0 }}>Loading product details…</p>
           </div>
+        )}
 
-          {/* ── RIGHT: Details ── */}
-          <div className="p-6 lg:p-8 flex flex-col gap-6">
+        {/* Error */}
+        {error && !loading && (
+          <div style={{ margin: 24, display: 'flex', alignItems: 'center', gap: 12, background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 12, padding: 16 }}>
+            <AlertCircle size={20} style={{ color: '#ef4444', flexShrink: 0 }} />
+            <p style={{ color: '#991b1b', fontSize: 14, margin: 0 }}>{error}</p>
+          </div>
+        )}
 
-            {/* Category & Title */}
-            <div>
-              <p className="text-xs text-amber-700 font-bold uppercase tracking-widest mb-2">
-                {product.category}
-              </p>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 leading-snug mb-3">
-                {product.name}
-              </h1>
+        {/* Detail */}
+        {detail && !loading && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
 
-              {/* Rating Row */}
-              <div className="flex items-center gap-3">
-                <div className="flex gap-0.5">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      size={16}
-                      className={i < product.rating ? 'fill-amber-400 text-amber-400' : 'text-gray-300'}
-                    />
-                  ))}
+            {/* Left column */}
+            <div style={{ padding: 24, borderRight: `1px solid ${t.cardBorder}` }}>
+              <div style={{ borderRadius: 16, overflow: 'hidden', aspectRatio: '1/1', background: t.isDark ? t.accentSoft : '#f3f4f6', border: `1px solid ${t.cardBorder}`, marginBottom: 16, position: 'relative' }}>
+                <img src={getItemImage(detail.item_name)} alt={detail.item_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <div style={{ position: 'absolute', top: 12, right: 12, background: stockStatus.bg, color: stockStatus.color, fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 20, border: `1px solid ${stockStatus.color}33` }}>
+                  {stockStatus.label}
                 </div>
-                <span className="text-sm font-semibold text-gray-800">{product.rating}.0</span>
-                <span className="text-sm text-gray-500">({product.reviews} reviews)</span>
-                <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">In Stock</span>
               </div>
+
+              {stockBatch && (
+                <div style={{ background: t.detailSpecBg, border: `1px solid ${t.detailSpecBorder}`, borderRadius: 12, padding: 16 }}>
+                  <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: t.accent, margin: '0 0 12px' }}>📦 Stock Batch Info</p>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 }}>
+                    <StatMini label="Total In" value={inQty?.toLocaleString('en-IN')} color="#22c55e" icon={TrendingUp} t={t} />
+                    <StatMini label="Total Out" value={outQty?.toLocaleString('en-IN')} color="#ef4444" icon={TrendingDown} t={t} />
+                    <StatMini label="Available" value={availableQty?.toLocaleString('en-IN')} color={t.accent} icon={Box} t={t} />
+                    <StatMini label="Batch Qty" value={stockBatch.quantity?.toLocaleString('en-IN')} color={t.pageText} icon={BarChart2} t={t} />
+                  </div>
+                  <InfoRow label="Batch No." value={stockBatch.batch_no} t={t} icon={Hash} />
+                  <InfoRow label="Lot No." value={stockBatch.lot_no} t={t} icon={Hash} />
+                  <InfoRow label="Stock Type" value={stockBatch.stock_type} t={t} icon={Box} />
+                  <InfoRow label="Stock In Date" value={fmt(stockBatch.stock_in_date)} t={t} icon={Calendar} />
+                  <InfoRow label="Last Out Date" value={fmt(stockBatch.last_stock_out_date)} t={t} icon={Calendar} />
+                  <InfoRow label="Expiry Date" value={fmt(stockBatch.expiry_date)} t={t} icon={Calendar} />
+                  <InfoRow label="Rack Location" value={stockBatch.rack_location} t={t} icon={Box} />
+                  <InfoRow label="Barcode" value={stockBatch.bar_code_id} t={t} icon={Hash} />
+                </div>
+              )}
             </div>
 
-            {/* Price */}
-            <div className="bg-amber-50 rounded-xl p-4">
-              <div className="flex items-baseline gap-3 mb-1">
-                <span className="text-3xl font-bold text-gray-900">₹{product.price.toLocaleString()}</span>
-                {product.originalPrice && (
-                  <span className="text-lg text-gray-400 line-through">₹{product.originalPrice.toLocaleString()}</span>
-                )}
-              </div>
-              {savings > 0 && (
-                <p className="text-green-600 text-sm font-semibold">
-                  You save ₹{savings.toLocaleString()} ({discount}% off)
+            {/* Right column */}
+            <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+              <div>
+                <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: t.accent, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  {detail.item_category || detail.item_group || detail.item_type || 'General'}
+                  {detail.sale_type && (
+                    <span style={{ background: t.primary, color: t.btnText, padding: '2px 8px', borderRadius: 10, fontSize: 9 }}>{detail.sale_type}</span>
+                  )}
                 </p>
-              )}
-              <p className="text-xs text-gray-500 mt-1">Inclusive of all taxes • Free hallmarking</p>
-            </div>
-
-            {/* Description */}
-            <div>
-              <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-2">About this piece</h3>
-              <p className="text-gray-600 text-sm leading-relaxed">{description}</p>
-            </div>
-
-            {/* Specs */}
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { label: 'Purity', value: '22KT / BIS 916' },
-                { label: 'Material', value: 'Hallmarked Gold' },
-                { label: 'Occasion', value: 'Festive / Wedding' },
-                { label: 'Warranty', value: '1 Year' },
-              ].map((spec) => (
-                <div key={spec.label} className="bg-gray-50 rounded-lg px-3 py-2">
-                  <p className="text-xs text-gray-500 mb-0.5">{spec.label}</p>
-                  <p className="text-sm font-semibold text-gray-800">{spec.value}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Quantity + Add to Cart */}
-            <div className="flex items-center gap-3">
-              {/* Qty */}
-              <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
-                <button
-                  onClick={() => setQty(Math.max(1, qty - 1))}
-                  className="px-3 py-2 hover:bg-gray-100 transition-colors text-gray-700 font-bold"
-                >
-                  −
-                </button>
-                <span className="px-4 py-2 text-sm font-semibold text-gray-900 border-x border-gray-200">
-                  {qty}
-                </span>
-                <button
-                  onClick={() => setQty(qty + 1)}
-                  className="px-3 py-2 hover:bg-gray-100 transition-colors text-gray-700 font-bold"
-                >
-                  +
-                </button>
+                <h1 style={{ fontSize: 22, fontWeight: 700, color: t.pageText, lineHeight: 1.3, margin: '0 0 4px' }}>{detail.item_name}</h1>
+                {detail.sku && <p style={{ fontSize: 12, color: t.subtleText, margin: 0 }}>SKU: {detail.sku}</p>}
               </div>
 
-              {/* Add to Cart */}
-              <button
-                onClick={handleAddToCart}
-                className={`flex-1 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-300 ${
-                  addedToCart
-                    ? 'bg-green-600 text-white'
-                    : 'bg-amber-700 hover:bg-amber-800 text-white'
-                }`}
-              >
-                {addedToCart ? (
-                  <><Check size={16} /> Added to Cart!</>
-                ) : (
-                  <><ShoppingCart size={16} /> Add to Cart</>
-                )}
-              </button>
-            </div>
-
-            {/* Trust Badges */}
-            <div className="grid grid-cols-3 gap-3 border-t border-gray-100 pt-5">
-              {[
-                { icon: Shield, label: 'Certified', sub: 'BIS Hallmarked' },
-                { icon: Truck, label: 'Free Delivery', sub: 'Orders above ₹999' },
-                { icon: RotateCcw, label: 'Easy Returns', sub: '7-day policy' },
-              ].map(({ icon: Icon, label, sub }) => (
-                <div key={label} className="flex flex-col items-center text-center gap-1">
-                  <div className="bg-amber-50 p-2 rounded-lg">
-                    <Icon size={18} className="text-amber-700" />
-                  </div>
-                  <p className="text-xs font-semibold text-gray-800">{label}</p>
-                  <p className="text-xs text-gray-500">{sub}</p>
+              <div style={{ background: t.detailSpecBg, border: `1px solid ${t.detailSpecBorder}`, borderRadius: 12, padding: 16 }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 6 }}>
+                  <span style={{ fontSize: 28, fontWeight: 700, color: t.priceColor }}>
+                    {mrp > 0 ? fp(mrp) : 'Price on request'}
+                  </span>
+                  {sellRate > 0 && sellRate < mrp && (
+                    <span style={{ fontSize: 16, textDecoration: 'line-through', color: t.isDark ? '#6b7280' : '#9ca3af' }}>{fp(sellRate)}</span>
+                  )}
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* ── Rating Breakdown + Reviews ── */}
-        <div className="border-t border-gray-100 px-6 lg:px-12 py-10">
-          <h2 className="text-xl font-bold text-gray-900 mb-8">Customer Reviews</h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-10">
-            {/* Overall */}
-            <div className="flex items-center gap-6">
-              <div className="text-center">
-                <p className="text-6xl font-bold text-gray-900">{product.rating}.0</p>
-                <div className="flex justify-center gap-0.5 my-2">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} size={16} className={i < product.rating ? 'fill-amber-400 text-amber-400' : 'text-gray-300'} />
-                  ))}
-                </div>
-                <p className="text-sm text-gray-500">{product.reviews} reviews</p>
+                {purchaseRate > 0 && <p style={{ fontSize: 11, color: t.subtleText, margin: '4px 0 0' }}>Purchase rate: {fp(purchaseRate)}</p>}
+                {(cgst > 0 || sgst > 0) && <p style={{ fontSize: 11, color: t.subtleText, margin: '2px 0 0' }}>GST: CGST {cgst}% + SGST {sgst}%</p>}
               </div>
-              {/* Bar chart */}
-              <div className="flex-1 space-y-2">
-                {ratingBreakdown.map(({ stars, pct }) => (
-                  <div key={stars} className="flex items-center gap-2 text-xs">
-                    <span className="w-4 text-gray-600 text-right">{stars}</span>
-                    <Star size={11} className="fill-amber-400 text-amber-400 flex-shrink-0" />
-                    <div className="flex-1 bg-gray-100 rounded-full h-2 overflow-hidden">
-                      <div
-                        className="h-2 bg-amber-400 rounded-full"
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
-                    <span className="w-7 text-gray-500">{pct}%</span>
-                  </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                {[
+                  ['Type', detail.item_type],
+                  ['Stock Method', detail.stock_method?.toUpperCase()],
+                  ['Perishable', detail.perishable === 'true' ? 'Yes' : detail.perishable === 'false' ? 'No' : null],
+                  ['Web Store', detail.web_store === 'true' ? 'Yes' : detail.web_store === 'false' ? 'No' : null],
+                ].filter(([, v]) => v).map(([label, value]) => (
+                  <SpecCard key={label} label={label} value={value} t={t} />
                 ))}
               </div>
+
+              {!customerId && (
+                <SignInBanner t={t} onSignInClick={() => { onClose(); onSignInRequest?.(); }} />
+              )}
+
+              {/* Qty stepper + Add to Cart */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', border: `1.5px solid ${t.cardBorder}`, borderRadius: 8, overflow: 'hidden' }}>
+                    <button
+                      onClick={() => setQty((q) => Math.max(1, q - 1))}
+                      disabled={isLoading}
+                      style={{ padding: '10px 14px', background: t.isDark ? t.tagBg : '#f9fafb', border: 'none', cursor: isLoading ? 'not-allowed' : 'pointer', color: t.pageText, fontSize: 16, fontWeight: 700 }}
+                    >−</button>
+                    <span style={{ padding: '10px 18px', fontSize: 14, fontWeight: 700, color: t.pageText, borderLeft: `1px solid ${t.cardBorder}`, borderRight: `1px solid ${t.cardBorder}` }}>{qty}</span>
+                    <button
+                      onClick={() => setQty((q) => q + 1)}
+                      disabled={isLoading}
+                      style={{ padding: '10px 14px', background: t.isDark ? t.tagBg : '#f9fafb', border: 'none', cursor: isLoading ? 'not-allowed' : 'pointer', color: t.pageText, fontSize: 16, fontWeight: 700 }}
+                    >+</button>
+                  </div>
+
+                  <button
+                    onClick={handleAddToCart}
+                    disabled={outDisabled}
+                    style={{
+                      flex: 1, padding: '12px 0', borderRadius: 10, border: 'none',
+                      cursor: outDisabled ? 'not-allowed' : 'pointer',
+                      background: btnBg, color: btnFg,
+                      fontSize: 14, fontWeight: 700,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    {btnState === 'loading' && <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> Adding…</>}
+                    {btnState === 'success' && <><Check size={16} /> Added to Cart!</>}
+                    {btnState === 'error' && <><AlertCircle size={16} /> {btnErr.slice(0, 28) || 'Failed'}</>}
+                    {btnState === 'idle' && (
+                      availableQty <= 0 ? 'Out of Stock' : <><ShoppingCart size={16} /> Add to Cart</>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Trust badges */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, paddingTop: 16, borderTop: `1px solid ${t.cardBorder}` }}>
+                <TrustBadge icon={Shield} label="BIS Certified" sub="Hallmarked" t={t} />
+                <TrustBadge icon={Truck} label="Free Delivery" sub="Above ₹999" t={t} />
+                <TrustBadge icon={RotateCcw} label="Easy Returns" sub="7-day policy" t={t} />
+              </div>
+
+              {/* Product meta */}
+              <div style={{ paddingTop: 16, borderTop: `1px solid ${t.cardBorder}` }}>
+                <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: t.accent, margin: '0 0 4px' }}>Product Details</p>
+                <InfoRow label="Item ID" value={`#${detail.id}`} t={t} icon={Hash} />
+                <InfoRow label="Item Tag" value={detail.item_tag} t={t} icon={Tag} />
+                <InfoRow label="Min Level" value={detail.min_level} t={t} icon={TrendingDown} />
+                <InfoRow label="Max Level" value={detail.max_level} t={t} icon={TrendingUp} />
+                <InfoRow label="Opening Stock" value={detail.opening_stock} t={t} icon={Box} />
+                <InfoRow label="UOM" value={detail.uom?.name || detail.uom_id} t={t} icon={Layers} />
+                <InfoRow label="Created" value={fmt(detail.created_at)} t={t} icon={Calendar} />
+                <InfoRow label="Last Updated" value={fmt(detail.updated_at)} t={t} icon={Calendar} />
+              </div>
             </div>
           </div>
-
-          {/* Review Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {reviews.map((r) => (
-              <div key={r.name} className="bg-gray-50 rounded-xl p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <div>
-                    <p className="font-bold text-gray-900 text-sm">{r.name}</p>
-                    <p className="text-xs text-gray-400">{r.date}</p>
-                  </div>
-                  <div className="flex gap-0.5">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} size={12} className={i < r.rating ? 'fill-amber-400 text-amber-400' : 'text-gray-300'} />
-                    ))}
-                  </div>
-                </div>
-                <p className="text-sm text-gray-600 leading-relaxed">{r.text}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+        )}
       </div>
     </>
   );
